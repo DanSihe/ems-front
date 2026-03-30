@@ -16,7 +16,7 @@ import HostLogin from './components/pages/hostLogin/hostLogin';
 import HostRegister from './components/pages/hostRegister/hostRegister';
 import HostUpdateAccount from './components/pages/hostUpdateAccount/hostUpdateAccount';
 import EventDetails from './components/pages/event-details/eventdetails';
-
+import MyEvents from './components/pages/my-events/MyEvents';
 const { Content } = Layout;
 
 const App = () => {
@@ -55,6 +55,7 @@ const App = () => {
             <Route path="/host-register" element={<HostRegister />} />
             <Route path="host-update" element={<HostUpdateAccount />} />
              <Route path="/event/:id" element={<EventDetails />} />
+             <Route path="/my-events" element={<MyEvents />} />
         
           </Routes>
         </Content>
@@ -64,3 +65,4 @@ const App = () => {
 };
 
 export default App;
+  
