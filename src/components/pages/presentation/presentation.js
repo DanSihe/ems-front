@@ -40,7 +40,7 @@ export default function Presentation() {
       <section className="event-grid">
         {events.map((event) => (
           <div className="event-card" key={event.id}>
-            <img src={event.image} alt={event.title} loading="lazy" />
+            <img src={event.imageUrl} alt={event.title} loading="lazy" />
             <div className="event-content">
               <h3>{event.title}</h3>
               <p className="date">{event.date}</p>
