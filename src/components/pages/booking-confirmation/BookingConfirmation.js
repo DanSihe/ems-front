@@ -83,6 +83,9 @@ const BookingConfirmation = () => {
     fetchBooking();
   }, [booking, bookingId]);
 
+  const paymentCard =
+    booking?.paymentCard || (bookingId ? sessionStorage.getItem(`paymentCard_${bookingId}`) : '');
+
   if (loading) {
     return (
       <div className="booking-confirmation-page">
@@ -171,11 +174,14 @@ const BookingConfirmation = () => {
                   <Descriptions.Item label="Booked for">
                     {`${booking.firstName || ''} ${booking.lastName || ''}`.trim() || 'Guest'}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Confirmation email">
+                  <Descriptions.Item label="Account email">
                     <Space>
                       <MailOutlined />
                       {booking.email}
                     </Space>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Payment method">
+                    {paymentCard || 'Dummy card used during booking'}
                   </Descriptions.Item>
                   <Descriptions.Item label="Booked at">
                     {formatDate(booking.bookedAt, {

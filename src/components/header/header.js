@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import './Header.css';
-import { Avatar, Dropdown, Menu, Modal, Button } from 'antd';
+import { Avatar, Drawer, Dropdown, Menu, Modal } from 'antd';
 import {
   UserOutlined,
   SettingOutlined,
   LogoutOutlined,
   CalendarOutlined,
-  
+  MenuOutlined,
 } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.svg';
@@ -16,6 +16,7 @@ const Header = () => {
   const [user, setUser] = useState(null);  // client
   const [host, setHost] = useState(null);  // host
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -42,14 +43,22 @@ const Header = () => {
   }
 };
     } else if (key === 'logout') {
-      localStorage.clear();
-      setUser(null);
-      setHost(null);
+      if (host) {
+        localStorage.removeItem('host');
+        setHost(null);
+      }
+      if (user) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('loggedIn');
+        setUser(null);
+      }
+      localStorage.removeItem('redirectAfterLogin');
+      window.dispatchEvent(new Event('storage'));
       navigate('/');
     } else if (key === 'login') {
       setIsModalVisible(true);
     } else if (key === 'manage') {
-      navigate('/manage-events');
+      navigate('/dashboard');
     }
   };
 
@@ -94,35 +103,52 @@ const Header = () => {
     navigate('/host-login');
   };
 
+  const handleHomeNavigation = () => {
+    setMobileMenuOpen(false);
+    navigate('/', { state: { refreshAt: Date.now() } });
+  };
+
   const greeting = host
     ? `Hi, ${host.firstName}! (Host)`
     : user
     ? `Hi, ${user.firstName}!`
     : null;
 
+  const navLinks = (
+    <>
+      <Link to="/" className="tab" onClick={() => setMobileMenuOpen(false)}>Featured Events</Link>
+      <Link to="/" className="tab" onClick={() => setMobileMenuOpen(false)}>Music</Link>
+      <Link to="/" className="tab" onClick={() => setMobileMenuOpen(false)}>Business</Link>
+      <Link to="/" className="tab" onClick={() => setMobileMenuOpen(false)}>Educational</Link>
+      {user && (
+        <Link to="/my-events" className="tab" onClick={() => setMobileMenuOpen(false)}>My Events</Link>
+      )}
+      {host && (
+        <Link to="/dashboard" className="tab highlight-tab" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+      )}
+    </>
+  );
+
   return (
     <>
       <header className="header_box">
-        <Link to="/">
+        <button type="button" className="header_logo_button" onClick={handleHomeNavigation}>
           <img className="header_logo" src={logo} alt="logo" />
-        </Link>
+        </button>
 
         <div className="tabs">
-          <Link to="/" className="tab">Featured Events</Link>
-          <Link to="/music" className="tab">Music</Link>
-          <Link to="/business" className="tab">Business</Link>
-          <Link to="/education" className="tab">Educational</Link>
-
-          {/* Conditionally show extra tabs */}
-          {user && (
-            <Link to="/my-events" className="tab">My Events</Link>
-          )}
-          {host && (
-            <Link to="/dashboard" className="tab">Dashboard</Link>
-          )}
+          {navLinks}
         </div>
 
         <div className="user_area">
+          <button
+            type="button"
+            className="mobile_menu_button"
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open navigation"
+          >
+            <MenuOutlined />
+          </button>
           {greeting && <span className="user_greeting">{greeting}</span>}
           <Dropdown overlay={menu} placement="bottomRight" trigger={['click']}>
             <Avatar icon={<UserOutlined />} size={50} style={{ cursor: 'pointer' }} />
@@ -150,6 +176,18 @@ const Header = () => {
   </div>
 </div>
       </Modal>
+
+      <Drawer
+        title="Navigation"
+        placement="left"
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+        className="mobile_nav_drawer"
+      >
+        <div className="mobile_nav_links">
+          {navLinks}
+        </div>
+      </Drawer>
     </>
   );
 };

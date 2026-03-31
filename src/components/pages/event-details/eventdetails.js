@@ -9,6 +9,8 @@ import {
   Empty,
   Image,
   InputNumber,
+  Modal,
+  Radio,
   Row,
   Skeleton,
   Space,
@@ -24,6 +26,7 @@ import {
   TagOutlined,
 } from '@ant-design/icons';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import mockCards from '../../../data/mockCards.json';
 import './EventDetails.css';
 
 const { Title, Paragraph, Text } = Typography;
@@ -53,6 +56,9 @@ const EventDetails = () => {
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
   const [error, setError] = useState('');
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState(mockCards[0]?.id || null);
+  const [cardCvv, setCardCvv] = useState('');
 
   const user = useMemo(() => {
     try {
@@ -88,7 +94,19 @@ const EventDetails = () => {
   const availableTickets = event?.ticketQuantity || 0;
   const totalPrice = (event?.ticketPrice || 0) * quantity;
 
-  const handleBooking = async () => {
+  const submitBooking = async () => {
+    const selectedCard = mockCards.find((card) => card.id === selectedCardId);
+
+    if (!selectedCard) {
+      messageApi.error('Select a dummy card to continue');
+      return;
+    }
+
+    if (cardCvv.trim() !== selectedCard.cvv) {
+      messageApi.error('CVV does not match the selected dummy card');
+      return;
+    }
+
     if (!user?.id) {
       localStorage.setItem('redirectAfterLogin', `/event/${id}`);
       navigate('/login', { state: { redirectTo: `/event/${id}` } });
@@ -121,14 +139,35 @@ const EventDetails = () => {
       }
 
       messageApi.success('Booking confirmed');
+      sessionStorage.setItem(
+        `paymentCard_${payload.bookingId}`,
+        `**** **** **** ${selectedCard.cardNumber.slice(-4)}`
+      );
       navigate(`/booking-confirmation?bookingId=${payload.bookingId}`, {
-        state: { booking: payload },
+        state: {
+          booking: {
+            ...payload,
+            paymentCard: `**** **** **** ${selectedCard.cardNumber.slice(-4)}`,
+          },
+        },
       });
+      setPaymentModalOpen(false);
+      setCardCvv('');
     } catch (bookingError) {
       messageApi.error(bookingError.message || 'Booking failed');
     } finally {
       setBooking(false);
     }
+  };
+
+  const handleBooking = async () => {
+    if (!user?.id) {
+      localStorage.setItem('redirectAfterLogin', `/event/${id}`);
+      navigate('/login', { state: { redirectTo: `/event/${id}` } });
+      return;
+    }
+
+    setPaymentModalOpen(true);
   };
 
   if (loading) {
@@ -297,13 +336,66 @@ const EventDetails = () => {
                 </Button>
 
                 <Text type="secondary" className="booking-trust-copy">
-                  Secure checkout flow, server-side price validation, and instant booking confirmation.
+                  Dummy checkout for development only. Pick one sample card and enter its CVV to confirm.
                 </Text>
               </Space>
             </Card>
           </Col>
         </Row>
       </div>
+
+      <Modal
+        open={paymentModalOpen}
+        title="Mock card payment"
+        onCancel={() => setPaymentModalOpen(false)}
+        onOk={submitBooking}
+        okText="Pay and book"
+        confirmLoading={booking}
+      >
+        <Space direction="vertical" size={16} className="full-width">
+          <Alert
+            type="info"
+            showIcon
+            message="Development-only payment"
+            description="Choose one of the 10 dummy cards from the JSON file and enter its CVV."
+          />
+
+          <Radio.Group
+            className="mock-card-group"
+            value={selectedCardId}
+            onChange={(event) => setSelectedCardId(event.target.value)}
+          >
+            <Space direction="vertical" className="full-width">
+              {mockCards.map((card) => (
+                <Radio key={card.id} value={card.id} className="mock-card-option">
+                  <div>
+                    <Text strong>{card.holderName}</Text>
+                    <div>
+                      <Text type="secondary">
+                        {`**** **** **** ${card.cardNumber.slice(-4)} | Exp ${card.expiry}`}
+                      </Text>
+                    </div>
+                  </div>
+                </Radio>
+              ))}
+            </Space>
+          </Radio.Group>
+
+          <div className="summary-row">
+            <Text>Booking total</Text>
+            <Text strong>{formatCurrency(totalPrice)}</Text>
+          </div>
+
+          <InputNumber
+            min={100}
+            max={999}
+            value={cardCvv ? Number(cardCvv) : null}
+            onChange={(value) => setCardCvv(value ? String(value) : '')}
+            className="full-width"
+            placeholder="Enter card CVV"
+          />
+        </Space>
+      </Modal>
     </div>
   );
 };

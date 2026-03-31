@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import "./Presentation.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Presentation() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,7 +26,7 @@ export default function Presentation() {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [location.key, location.state?.refreshAt]);
 
   if (loading) return <p>Loading events...</p>;
   if (error) return <p>Error loading events: {error}</p>;

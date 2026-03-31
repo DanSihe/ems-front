@@ -1,22 +1,30 @@
 .header_box {
   width: 100%;
-  height: 100px;
-  background: linear-gradient(90deg, #1b1e3c, #282c54);
+  min-height: 88px;
+  background: linear-gradient(120deg, #0f172a, #1d3557 55%, #264653);
   display: flex;
   align-items: center;
-  padding: 0 40px;
+  padding: 14px 28px;
   justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 16px 35px rgba(15, 23, 42, 0.18);
+  gap: 20px;
 }
 
 .header_logo {
-  height: 90px;
+  height: 60px;
   width: auto;
   filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
   transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.header_logo_button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
 }
 .header_logo:hover {
   transform: scale(1.05);
@@ -25,34 +33,55 @@
 
 .tabs {
   display: flex;
-  gap: 30px;
-  font-size: 16px;
+  gap: 16px;
+  font-size: 15px;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .tab {
   color: #fff;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   position: relative;
-  padding: 8px 12px;
+  padding: 10px 14px;
   transition: 0.3s;
+  border-radius: 999px;
 }
 
 .tab:hover {
-  color: #00ffd1;
-  transform: scale(1.05);
+  color: #dff6ff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.highlight-tab {
+  background: linear-gradient(135deg, #ffb703, #fb8500);
+  color: #102a43;
 }
 
 .user_area {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
 
 .user_greeting {
   color: #fff;
-  font-size: 16px;
-  margin-right: 10px;
+  font-size: 15px;
   font-weight: 500;
+}
+
+.mobile_menu_button {
+  display: none;
+  border: 0;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  font-size: 18px;
 }
 
 .login-role-selection {
@@ -98,6 +127,17 @@
   margin: 0;
 }
 
+.mobile_nav_links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobile_nav_links .tab {
+  color: #102a43;
+  background: #f8fafc;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -106,5 +146,39 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 992px) {
+  .tabs {
+    display: none;
+  }
+
+  .mobile_menu_button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header_box {
+    padding: 14px 18px;
+  }
+}
+
+@media (max-width: 576px) {
+  .header_logo {
+    height: 48px;
+  }
+
+  .user_greeting {
+    display: none;
+  }
+
+  .login-role-selection {
+    flex-direction: column;
+  }
+
+  .login-card {
+    width: 100%;
   }
 }

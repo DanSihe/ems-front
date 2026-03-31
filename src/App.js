@@ -18,6 +18,7 @@ import HostUpdateAccount from './components/pages/hostUpdateAccount/hostUpdateAc
 import EventDetails from './components/pages/event-details/eventdetails';
 import MyEvents from './components/pages/my-events/MyEvents';
 import BookingConfirmation from './components/pages/booking-confirmation/BookingConfirmation';
+import HostDashboard from './components/pages/host-dashboard/HostDashboard';
 const { Content } = Layout;
 
 const App = () => {
@@ -58,6 +59,7 @@ const App = () => {
              <Route path="/event/:id" element={<EventDetails />} />
              <Route path="/my-events" element={<MyEvents />} />
              <Route path={path.bookingConfirmationPath} element={<BookingConfirmation />} />
+             <Route path={path.dashboardPath} element={<HostDashboard />} />
         
           </Routes>
         </Content>

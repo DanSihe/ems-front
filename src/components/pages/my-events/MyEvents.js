@@ -178,7 +178,9 @@ const MyEvents = () => {
                 >
                   <Space direction="vertical" size={14} className="full-width">
                     <div className="my-booking-top">
-                      <Tag color="green">Confirmed</Tag>
+                      <Tag color={booking.status === 'CONFIRMED' ? 'green' : booking.status === 'REFUNDED' ? 'blue' : 'orange'}>
+                        {booking.status}
+                      </Tag>
                       <Text type="secondary">Ref #{booking.id}</Text>
                     </div>
 
@@ -198,7 +200,19 @@ const MyEvents = () => {
                       </Text>
                       <Text>Tickets: {booking.quantity}</Text>
                       <Text>Total: {formatCurrency(booking.totalPrice)}</Text>
+                      {booking.refundStatus && booking.refundStatus !== 'NOT_REQUIRED' && (
+                        <Text>Refund: {booking.refundStatus}</Text>
+                      )}
                     </Space>
+
+                    {booking.notificationMessage && (
+                      <Alert
+                        type="info"
+                        showIcon
+                        message="Latest update"
+                        description={booking.notificationMessage}
+                      />
+                    )}
 
                     <Popconfirm
                       title="Cancel this booking?"
@@ -207,7 +221,7 @@ const MyEvents = () => {
                       cancelText="Keep booking"
                       onConfirm={() => cancelBooking(booking.id)}
                     >
-                      <Button danger icon={<DeleteOutlined />} block>
+                      <Button danger icon={<DeleteOutlined />} block disabled={booking.status !== 'CONFIRMED'}>
                         Cancel booking
                       </Button>
                     </Popconfirm>

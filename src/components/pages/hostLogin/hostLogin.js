@@ -29,7 +29,7 @@ const HostLogin = () => {
       window.dispatchEvent(new Event('storage'));
 
       setTimeout(() => {
-        navigate('/');
+        navigate('/dashboard');
       }, 1500);
     } catch (error) {
       message.error(`Login failed: ${error.message}`);

@@ -1,0 +1,12 @@
+[
+  { "id": 1, "holderName": "Emma Lewis", "cardNumber": "4539218745612031", "expiry": "06/28", "cvv": "231" },
+  { "id": 2, "holderName": "Noah Walker", "cardNumber": "5217349081264452", "expiry": "09/27", "cvv": "445" },
+  { "id": 3, "holderName": "Olivia Harris", "cardNumber": "4487609123458712", "expiry": "03/29", "cvv": "712" },
+  { "id": 4, "holderName": "Liam Martin", "cardNumber": "5348129076451208", "expiry": "11/28", "cvv": "208" },
+  { "id": 5, "holderName": "Sophia Young", "cardNumber": "4723901864527704", "expiry": "08/30", "cvv": "704" },
+  { "id": 6, "holderName": "Ethan King", "cardNumber": "5192048765318826", "expiry": "01/29", "cvv": "826" },
+  { "id": 7, "holderName": "Ava Scott", "cardNumber": "4378651209483619", "expiry": "12/27", "cvv": "619" },
+  { "id": 8, "holderName": "Mason Hall", "cardNumber": "5487612390456137", "expiry": "07/28", "cvv": "137" },
+  { "id": 9, "holderName": "Isabella Green", "cardNumber": "4567823419052748", "expiry": "04/30", "cvv": "748" },
+  { "id": 10, "holderName": "Lucas Adams", "cardNumber": "5276341890542295", "expiry": "10/29", "cvv": "295" }
+]
