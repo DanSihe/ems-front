@@ -1,177 +1,168 @@
-/* Container for Event Details */
-.event-details-body {
-  display: flex;
-  justify-content: space-between;
-  gap: 40px;
-  padding: 60px 80px;
-  max-width: 1400px;
+.event-details-page {
+  min-height: calc(100vh - 72px);
+  padding: 24px 0 40px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 221, 181, 0.45), transparent 30%),
+    linear-gradient(180deg, #fff9f2 0%, #f4f7fb 60%, #edf2f7 100%);
+}
+
+.event-details-shell {
+  max-width: 1280px;
   margin: 0 auto;
-  font-family: "Poppins", sans-serif;
-  flex-wrap: wrap;
+  padding: 0 12px;
 }
 
-/* Left side: Event Info */
-.event-left {
-  flex: 1 1 55%;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  padding: 35px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.9);
-  overflow: hidden;
-  z-index: 1;
+.event-details-breadcrumb {
+  margin-bottom: 20px;
 }
 
-.event-overlay {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
-  opacity: 0.08;
-  z-index: 0;
-  border-radius: 20px;
+.event-hero-card,
+.booking-panel-card,
+.event-stat-card {
+  border-radius: 28px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
 }
 
-.event-left h1 {
-  font-size: 2.7rem;
-  color: #222;
-  background: linear-gradient(90deg, #ff5722, #ff8a50);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  position: relative;
-  z-index: 1;
-}
-
-.event-date, .event-description, .event-highlights {
-  position: relative;
-  z-index: 1;
-}
-
-.event-date {
-  font-size: 1.2rem;
-  color: #666;
-  font-weight: 500;
-}
-
-.event-description {
-  font-size: 1.2rem;
-  line-height: 1.7;
-  color: #444;
-}
-
-.event-highlights {
-  list-style: none;
+.event-hero-card .ant-card-body,
+.booking-panel-card .ant-card-body,
+.event-stat-card .ant-card-body {
   padding: 0;
+}
+
+.event-hero-image {
+  width: 100%;
+  border-radius: 28px 28px 0 0;
+  overflow: hidden;
+}
+
+.event-hero-image .ant-image-img {
+  height: 380px;
+  object-fit: cover;
+}
+
+.event-hero-content {
+  padding: 28px;
+}
+
+.event-title {
+  margin-top: 12px;
+  margin-bottom: 16px !important;
+  color: #1f2937 !important;
+}
+
+.event-description-copy {
+  color: #5b6472;
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 24px !important;
+}
+
+.event-stats-row {
+  margin-top: 8px;
+}
+
+.event-stat-card .ant-card-body {
+  padding: 20px;
+}
+
+.booking-panel-card .ant-card-body {
+  padding: 28px;
+}
+
+.booking-panel-label {
+  color: #d97706;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.booking-panel-title {
+  margin: 6px 0 0 !important;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.booking-summary-box {
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%);
+}
+
+.booking-summary-box .ant-card-body {
+  padding: 22px;
+}
+
+.summary-row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
 }
 
-.event-highlights li {
-  position: relative;
-  padding-left: 25px;
-  font-size: 1rem;
-  color: #555;
-  font-weight: 500;
-}
-
-.event-highlights li::before {
-  content: "✔";
-  position: absolute;
-  left: 0;
-  color: #ff5722;
-  font-weight: bold;
-}
-
-/* Right side: Booking Card */
-.event-right {
-  flex: 1 1 40%;
-  display: flex;
-  justify-content: center;
+.booking-quantity-row {
   align-items: flex-start;
 }
 
-.booking-card {
-  background: linear-gradient(145deg, #ff7e5f, #feb47b);
-  padding: 30px 25px;
-  border-radius: 25px;
-  box-shadow: 0 18px 50px rgba(0,0,0,0.1);
-  text-align: center;
-  width: 100%;
-  max-width: 420px;
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.booking-divider {
+  margin: 4px 0 !important;
 }
 
-.booking-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+.booking-total {
+  margin: 0 !important;
+  color: #111827 !important;
 }
 
-.booking-img {
-  width: 100%;
-  border-radius: 20px;
-  object-fit: cover;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-}
-
-.action-btn {
-  background: #fff;
-  color: #ff7e5f;
-  padding: 14px 28px;
+.booking-action-button {
+  height: 50px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ff7a18 0%, #f04e23 100%);
   border: none;
-  border-radius: 15px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  box-shadow: 0 18px 34px rgba(240, 78, 35, 0.22);
 }
 
-.action-btn:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 12px 28px rgba(255,87,34,0.4);
+.booking-action-button:hover,
+.booking-action-button:focus {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
 }
 
-.platform-info {
-  font-size: 0.9rem;
-  color: #fff;
+.booking-trust-copy {
+  line-height: 1.7;
 }
 
-.not-found {
-  text-align: center;
-  font-size: 1.8rem;
-  margin-top: 50px;
-  color: #ff5722;
+.event-details-shell.ant-card {
+  border-radius: 28px;
 }
 
-/* Social Proof */
-.social-proof {
-  margin-top: 15px;
-  font-size: 0.9rem;
-  opacity: 0.85;
-  text-align: center;
+.event-details-skeleton-image {
+  width: 100% !important;
+  height: 320px !important;
+  margin-bottom: 20px;
 }
 
-/* Responsive */
-@media (max-width: 1000px) {
-  .event-details-body {
+@media (max-width: 992px) {
+  .event-hero-image .ant-image-img {
+    height: 300px;
+  }
+
+  .event-hero-content,
+  .booking-panel-card .ant-card-body {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 576px) {
+  .event-details-page {
+    padding-top: 16px;
+  }
+
+  .event-title {
+    font-size: 2rem !important;
+  }
+
+  .summary-row {
     flex-direction: column;
-    padding: 40px 20px;
-  }
-
-  .event-left, .event-right {
-    flex: 1 1 100%;
-    text-align: center;
-  }
-
-  .booking-card {
-    max-width: 100%;
+    align-items: flex-start;
   }
 }

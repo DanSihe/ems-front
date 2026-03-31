@@ -1,0 +1,63 @@
+.booking-confirmation-page {
+  min-height: calc(100vh - 72px);
+  padding: 24px 0 40px;
+  background:
+    radial-gradient(circle at top right, rgba(167, 243, 208, 0.5), transparent 25%),
+    linear-gradient(180deg, #f7fffb 0%, #eef4ff 55%, #f7f8fc 100%);
+}
+
+.booking-confirmation-shell {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 12px;
+}
+
+.confirmation-result,
+.confirmation-main-card,
+.confirmation-side-card {
+  border-radius: 28px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+}
+
+.confirmation-result {
+  margin-bottom: 24px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.confirmation-main-card .ant-card-body,
+.confirmation-side-card .ant-card-body {
+  padding: 28px;
+}
+
+.confirmation-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.confirmation-title {
+  margin: 0 !important;
+}
+
+.confirmation-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.confirmation-total-row {
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1px solid #f0f0f0;
+}
+
+@media (max-width: 768px) {
+  .confirmation-main-card .ant-card-body,
+  .confirmation-side-card .ant-card-body {
+    padding: 22px;
+  }
+
+  .confirmation-row {
+    flex-direction: column;
+  }
+}
