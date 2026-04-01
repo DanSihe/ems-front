@@ -13,6 +13,7 @@ import {
   Layout,
   Menu,
   Modal,
+  Rate,
   Row,
   Select,
   Space,
@@ -34,6 +35,7 @@ import {
   PlusOutlined,
   StopOutlined,
   TeamOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -55,15 +57,24 @@ const formatDate = (value) =>
         weekday: 'short',
         day: 'numeric',
         month: 'short',
-        year: 'numeric',
+      year: 'numeric',
       })
     : 'TBA';
+
+const averageRating = (items) => {
+  if (!items.length) {
+    return 0;
+  }
+
+  return items.reduce((sum, item) => sum + (item.rating || 0), 0) / items.length;
+};
 
 const HostDashboard = () => {
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
   const [activeTab, setActiveTab] = useState('overview');
   const [dashboard, setDashboard] = useState({ stats: {}, events: [], bookings: [] });
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -71,8 +82,11 @@ const HostDashboard = () => {
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [replyModalOpen, setReplyModalOpen] = useState(false);
+  const [selectedReview, setSelectedReview] = useState(null);
   const [eventForm] = Form.useForm();
   const [cancelForm] = Form.useForm();
+  const [replyForm] = Form.useForm();
 
   const host = useMemo(() => {
     try {
@@ -107,6 +121,24 @@ const HostDashboard = () => {
     }
   }, [host?.id, messageApi]);
 
+  const fetchReviews = useCallback(async () => {
+    if (!host?.id) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/reviews/host/${host.id}`);
+      if (!response.ok) {
+        throw new Error('Unable to load reviews');
+      }
+
+      const data = await response.json();
+      setReviews(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setReviews([]);
+    }
+  }, [host?.id]);
+
   useEffect(() => {
     if (!host?.id) {
       navigate('/host-login');
@@ -114,7 +146,8 @@ const HostDashboard = () => {
     }
 
     fetchDashboard();
-  }, [fetchDashboard, host?.id, navigate]);
+    fetchReviews();
+  }, [fetchDashboard, fetchReviews, host?.id, navigate]);
 
   const openCreateModal = () => {
     setEditingEvent(null);
@@ -168,6 +201,7 @@ const HostDashboard = () => {
       setEventModalOpen(false);
       eventForm.resetFields();
       fetchDashboard();
+      fetchReviews();
     } catch (error) {
       messageApi.error(error.message || 'Save failed');
     } finally {
@@ -201,6 +235,7 @@ const HostDashboard = () => {
       cancelForm.resetFields();
       setSelectedEvent(null);
       fetchDashboard();
+      fetchReviews();
     } catch (error) {
       messageApi.error(error.message || 'Cancellation failed');
     } finally {
@@ -234,9 +269,47 @@ const HostDashboard = () => {
     }
   };
 
+  const handleReplySubmit = async (values) => {
+    if (!selectedReview) {
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const response = await fetch(
+        `http://localhost:8080/api/reviews/${selectedReview.id}/reply`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            hostReply: values.hostReply,
+          }),
+        }
+      );
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(typeof payload === 'string' ? payload : 'Unable to save reply');
+      }
+
+      setReviews((current) =>
+        current.map((review) => (review.id === payload.id ? payload : review))
+      );
+      setReplyModalOpen(false);
+      setSelectedReview(null);
+      replyForm.resetFields();
+      messageApi.success('Reply saved');
+    } catch (error) {
+      messageApi.error(error.message || 'Reply failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const pendingRefunds = dashboard.bookings.filter(
     (booking) => booking.refundStatus === 'PENDING'
   );
+  const reviewAverage = averageRating(reviews);
 
   const recentBookings = [...dashboard.bookings]
     .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
@@ -247,6 +320,7 @@ const HostDashboard = () => {
     { key: 'events', icon: <CalendarOutlined />, label: 'Events' },
     { key: 'bookings', icon: <TeamOutlined />, label: 'Bookings' },
     { key: 'refunds', icon: <CreditCardOutlined />, label: 'Refunds' },
+    { key: 'reviews', icon: <MessageOutlined />, label: 'Reviews' },
   ];
 
   const statsCards = [
@@ -274,6 +348,12 @@ const HostDashboard = () => {
       title: 'Available seats',
       value: dashboard.stats.availableSeats || 0,
       icon: <FundOutlined />,
+    },
+    {
+      key: 'reviews',
+      title: 'Reviews',
+      value: reviews.length,
+      icon: <MessageOutlined />,
     },
   ];
 
@@ -538,6 +618,95 @@ const HostDashboard = () => {
     </Space>
   );
 
+  const reviewColumns = [
+    {
+      title: 'Event',
+      key: 'eventTitle',
+      render: (_, record) => (
+        <div>
+          <Text strong>{record.eventTitle}</Text>
+          <div>
+            <Text type="secondary">{record.reviewerName}</Text>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Rating',
+      key: 'rating',
+      render: (_, record) => <Rate disabled value={record.rating} />,
+    },
+    {
+      title: 'Review',
+      key: 'comment',
+      render: (_, record) => (
+        <div>
+          <Text>{record.comment}</Text>
+          {record.hostReply && (
+            <div className="review-reply-preview">
+              <Text type="secondary">Reply: {record.hostReply}</Text>
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record) => (
+        <Button
+          type={record.hostReply ? 'default' : 'primary'}
+          onClick={() => {
+            setSelectedReview(record);
+            replyForm.setFieldsValue({ hostReply: record.hostReply || '' });
+            setReplyModalOpen(true);
+          }}
+        >
+          {record.hostReply ? 'Edit reply' : 'Reply'}
+        </Button>
+      ),
+    },
+  ];
+
+  const renderReviews = () => (
+    <Space direction="vertical" size={18} className="dashboard-full-width">
+      <Card className="dashboard-section-card" bordered={false}>
+        <div className="google-host-review-bar">
+          <Space align="center">
+            <div className="google-badge">G</div>
+            <div>
+              <Text strong>Public review score</Text>
+              <div>
+                <Text type="secondary">Based on real user reviews for your events</Text>
+              </div>
+            </div>
+          </Space>
+          <Space>
+            <Title level={3} className="google-bar-score">
+              {reviewAverage ? reviewAverage.toFixed(1) : '0.0'}
+            </Title>
+            <Rate allowHalf disabled value={reviewAverage} />
+          </Space>
+        </div>
+      </Card>
+
+      <Card
+        className="dashboard-section-card"
+        bordered={false}
+        title="User reviews and host replies"
+        extra={<Tag color="purple">{reviews.length} total</Tag>}
+      >
+        <Table
+          rowKey="id"
+          columns={reviewColumns}
+          dataSource={reviews}
+          pagination={{ pageSize: 8 }}
+          scroll={{ x: 960 }}
+        />
+      </Card>
+    </Space>
+  );
+
   const renderActivePanel = () => {
     switch (activeTab) {
       case 'events':
@@ -546,6 +715,8 @@ const HostDashboard = () => {
         return renderBookings();
       case 'refunds':
         return renderRefunds();
+      case 'reviews':
+        return renderReviews();
       default:
         return renderOverview();
     }
@@ -725,6 +896,34 @@ const HostDashboard = () => {
             rules={[{ required: true, message: 'Add a reason for cancellation' }]}
           >
             <TextArea rows={4} placeholder="Venue issue, host request, weather disruption..." />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        open={replyModalOpen}
+        title="Reply to review"
+        onCancel={() => {
+          setReplyModalOpen(false);
+          setSelectedReview(null);
+        }}
+        onOk={() => replyForm.submit()}
+        okText="Save reply"
+        confirmLoading={submitting}
+      >
+        <Form form={replyForm} layout="vertical" onFinish={handleReplySubmit}>
+          <Form.Item label="Reviewer">
+            <Text>{selectedReview?.reviewerName || '-'}</Text>
+          </Form.Item>
+          <Form.Item label="Review">
+            <Text>{selectedReview?.comment || '-'}</Text>
+          </Form.Item>
+          <Form.Item
+            name="hostReply"
+            label="Your reply"
+            rules={[{ required: true, message: 'Write a reply for the user' }]}
+          >
+            <TextArea rows={4} placeholder="Thank the user and respond professionally." />
           </Form.Item>
         </Form>
       </Modal>

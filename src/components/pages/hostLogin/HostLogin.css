@@ -8,7 +8,7 @@
 
 .login-left {
   flex: 1;
-  background: linear-gradient(135deg, #1890ff, #66ccff);
+  background: linear-gradient(135deg, #497cf4, #497cf4 50%, #1d3557);
   color: white;
   padding: 60px 40px;
   display: flex;
