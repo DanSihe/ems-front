@@ -26,6 +26,7 @@ import {
   CalendarOutlined,
   EnvironmentOutlined,
   ShoppingCartOutlined,
+  CheckCircleOutlined,
   TagOutlined,
 } from '@ant-design/icons';
 import { FcGoogle } from 'react-icons/fc';
@@ -74,6 +75,9 @@ const EventDetails = () => {
   const [reviews, setReviews] = useState([]);
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [seatLayout, setSeatLayout] = useState(null);
+  const [seatLayoutLoading, setSeatLayoutLoading] = useState(false);
+  const [selectedSeats, setSelectedSeats] = useState([]);
   const [reviewForm] = Form.useForm();
 
   const user = useMemo(() => {
@@ -127,9 +131,70 @@ const EventDetails = () => {
     fetchReviews();
   }, [id]);
 
-  const availableTickets = event?.ticketQuantity || 0;
+  useEffect(() => {
+    const fetchSeatLayout = async () => {
+      try {
+        setSeatLayoutLoading(true);
+        const response = await fetch(`http://localhost:8080/api/bookings/layout/${id}`);
+        if (!response.ok) {
+          throw new Error('Unable to load seat layout');
+        }
+
+        const data = await response.json();
+        setSeatLayout(data);
+      } catch (layoutError) {
+        setSeatLayout(null);
+      } finally {
+        setSeatLayoutLoading(false);
+      }
+    };
+
+    fetchSeatLayout();
+  }, [id]);
+
+  useEffect(() => {
+    setSelectedSeats((current) => current.slice(0, quantity));
+  }, [quantity]);
+
+  const availableTickets = seatLayout?.availableSeats ?? event?.ticketQuantity ?? 0;
   const totalPrice = (event?.ticketPrice || 0) * quantity;
   const eventAverageRating = averageRating(reviews);
+  const seatsByRow = useMemo(() => {
+    if (!seatLayout?.seats?.length) {
+      return [];
+    }
+
+    return seatLayout.seats.reduce((rows, seat) => {
+      const rowIndex = seat.row - 1;
+      if (!rows[rowIndex]) {
+        rows[rowIndex] = {
+          row: seat.row,
+          seats: [],
+        };
+      }
+      rows[rowIndex].seats.push(seat);
+      return rows;
+    }, []);
+  }, [seatLayout]);
+
+  const toggleSeatSelection = (seat) => {
+    if (seat.status === 'BOOKED') {
+      return;
+    }
+
+    setSelectedSeats((current) => {
+      if (current.includes(seat.label)) {
+        return current.filter((item) => item !== seat.label);
+      }
+
+      if (current.length >= quantity) {
+        messageApi.warning(`You can select up to ${quantity} seat${quantity > 1 ? 's' : ''}.`);
+        return current;
+      }
+
+      return [...current, seat.label];
+    });
+  };
 
   const submitBooking = async () => {
     const selectedCard = mockCards.find((card) => card.id === selectedCardId);
@@ -150,6 +215,11 @@ const EventDetails = () => {
       return;
     }
 
+    if (selectedSeats.length !== quantity) {
+      messageApi.error(`Please select exactly ${quantity} seat${quantity > 1 ? 's' : ''}.`);
+      return;
+    }
+
     try {
       setBooking(true);
 
@@ -162,6 +232,7 @@ const EventDetails = () => {
           eventId: Number(id),
           userId: user.id,
           quantity,
+          selectedSeats,
         }),
       });
 
@@ -190,6 +261,7 @@ const EventDetails = () => {
       });
       setPaymentModalOpen(false);
       setCardCvv('');
+      setSelectedSeats([]);
     } catch (bookingError) {
       messageApi.error(bookingError.message || 'Booking failed');
     } finally {
@@ -201,6 +273,11 @@ const EventDetails = () => {
     if (!user?.id) {
       localStorage.setItem('redirectAfterLogin', `/event/${id}`);
       navigate('/login', { state: { redirectTo: `/event/${id}` } });
+      return;
+    }
+
+    if (selectedSeats.length !== quantity) {
+      messageApi.error(`Please choose ${quantity} seat${quantity > 1 ? 's' : ''} from the layout first.`);
       return;
     }
 
@@ -386,6 +463,12 @@ const EventDetails = () => {
                       <Text>Availability</Text>
                       <Text strong>{availableTickets} remaining</Text>
                     </div>
+                    <div className="summary-row summary-row-start">
+                      <Text>Selected seats</Text>
+                      <Text strong>
+                        {selectedSeats.length ? selectedSeats.join(', ') : 'Choose from map'}
+                      </Text>
+                    </div>
                     <Divider className="booking-divider" />
                     <div className="summary-row total-row">
                       <Text strong>Total</Text>
@@ -416,6 +499,88 @@ const EventDetails = () => {
             </Card>
           </Col>
         </Row>
+
+        <Card className="seat-layout-card" bordered={false}>
+          <Space direction="vertical" size={20} className="full-width">
+            <div className="seat-layout-header">
+              <div>
+                <Text className="booking-panel-label">Interactive seating</Text>
+                <Title level={3} className="booking-panel-title">
+                  Choose your seats
+                </Title>
+              </div>
+              <div className="seat-layout-stats">
+                <Tag color="green">{availableTickets} available</Tag>
+                <Tag color="red">{seatLayout?.bookedSeats ?? 0} booked</Tag>
+                <Tag color="gold">{selectedSeats.length} selected</Tag>
+              </div>
+            </div>
+
+            <div className="seat-legend">
+              <span className="seat-legend-item">
+                <span className="seat-legend-chip seat-legend-chip-available" />
+                Available
+              </span>
+              <span className="seat-legend-item">
+                <span className="seat-legend-chip seat-legend-chip-selected" />
+                Selected
+              </span>
+              <span className="seat-legend-item">
+                <span className="seat-legend-chip seat-legend-chip-booked" />
+                Booked
+              </span>
+            </div>
+
+            {seatLayoutLoading ? (
+              <Skeleton active paragraph={{ rows: 6 }} />
+            ) : !seatLayout?.seats?.length ? (
+              <Empty description="Seat layout unavailable for this event" />
+            ) : (
+              <div className="seat-map-shell">
+                <div className="stage-banner">Stage View</div>
+                <div className="seat-grid-wrap">
+                  {seatsByRow.map((rowBlock) => (
+                    <div key={rowBlock.row} className="seat-row">
+                      <span className="seat-row-label">{String.fromCharCode(64 + rowBlock.row)}</span>
+                      <div className="seat-row-seats">
+                        {rowBlock.seats.map((seat, index) => {
+                          const isSelected = selectedSeats.includes(seat.label);
+                          const isBooked = seat.status === 'BOOKED';
+                          const seatClassName = [
+                            'seat-tile',
+                            isBooked ? 'seat-booked' : 'seat-available',
+                            isSelected ? 'seat-selected' : '',
+                            index === 3 ? 'seat-aisle-gap' : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ');
+
+                          return (
+                            <button
+                              key={seat.label}
+                              type="button"
+                              className={seatClassName}
+                              onClick={() => toggleSeatSelection(seat)}
+                              disabled={isBooked}
+                              aria-pressed={isSelected}
+                              aria-label={`${seat.label} ${isBooked ? 'booked' : isSelected ? 'selected' : 'available'}`}
+                            >
+                              {seat.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="seat-selection-note">
+                  <CheckCircleOutlined />
+                  <span>Select {quantity} seat{quantity > 1 ? 's' : ''} to continue to payment.</span>
+                </div>
+              </div>
+            )}
+          </Space>
+        </Card>
 
         <Row gutter={[24, 24]} className="review-section-row">
           <Col xs={24} lg={10}>
@@ -562,6 +727,11 @@ const EventDetails = () => {
           <div className="summary-row">
             <Text>Booking total</Text>
             <Text strong>{formatCurrency(totalPrice)}</Text>
+          </div>
+
+          <div className="summary-row summary-row-start">
+            <Text>Seats</Text>
+            <Text strong>{selectedSeats.join(', ')}</Text>
           </div>
 
           <InputNumber

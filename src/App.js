@@ -19,6 +19,7 @@ import EventDetails from './components/pages/event-details/eventdetails';
 import MyEvents from './components/pages/my-events/MyEvents';
 import BookingConfirmation from './components/pages/booking-confirmation/BookingConfirmation';
 import HostDashboard from './components/pages/host-dashboard/HostDashboard';
+import Footer from './components/footer/footer';
 const { Content } = Layout;
 
 const App = () => {
@@ -32,7 +33,7 @@ const App = () => {
 
   return (
     <Router>
-      <Layout style={{ minHeight: '100vh' }}>
+      <Layout style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Header
           style={{
             padding: 0,
@@ -42,10 +43,10 @@ const App = () => {
         />
         <Content
           style={{
+            flex: 1,
             margin: 0,
             padding: 12,
             background: colorBgContainer,
-            minHeight: `calc(100vh - 50px)`, // 64px default Ant header height, adjust if your header height differs
           }}
         >
           <Routes>
@@ -63,6 +64,7 @@ const App = () => {
         
           </Routes>
         </Content>
+        <Footer />
       </Layout>
     </Router>
   );

@@ -56,8 +56,39 @@
   margin-bottom: 24px;
 }
 
+.host-login-subtitle {
+  text-align: center;
+  color: #52606d;
+  margin-bottom: 18px;
+  line-height: 1.6;
+}
+
+.host-mfa-alert {
+  margin-bottom: 18px;
+}
+
 .register-link {
   margin-top: 12px;
   text-align: center;
   font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .login-wrapper {
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .login-left,
+  .login-right {
+    width: 100%;
+  }
+
+  .login-left {
+    padding: 48px 24px;
+  }
+
+  .login-right {
+    padding: 24px 16px 40px;
+  }
 }

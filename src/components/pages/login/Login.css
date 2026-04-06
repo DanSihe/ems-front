@@ -53,6 +53,41 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.login-form-title {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #102a43;
+}
+
+.login-form-subtitle {
+  text-align: center;
+  color: #52606d;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.mfa-alert {
+  margin-bottom: 20px;
+}
+
+.mfa-code-input input {
+  text-align: center;
+  letter-spacing: 0.35em;
+  font-size: 1.1rem;
+}
+
+.login-link-button {
+  border: 0;
+  background: transparent;
+  color: #1d4ed8;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.login-link-button:hover {
+  color: #102a43;
+}
+
 @keyframes fadeInLeft {
   from {
     opacity: 0;
@@ -72,5 +107,26 @@
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .login-left,
+  .login-right {
+    min-height: auto;
+  }
+
+  .login-left {
+    padding: 48px 24px;
+  }
+
+  .login-right {
+    padding: 24px 16px 40px;
   }
 }

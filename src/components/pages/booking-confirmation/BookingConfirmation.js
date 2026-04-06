@@ -183,6 +183,9 @@ const BookingConfirmation = () => {
                   <Descriptions.Item label="Payment method">
                     {paymentCard || 'Dummy card used during booking'}
                   </Descriptions.Item>
+                  <Descriptions.Item label="Seats">
+                    {booking.selectedSeats?.length ? booking.selectedSeats.join(', ') : 'Auto-assigned'}
+                  </Descriptions.Item>
                   <Descriptions.Item label="Booked at">
                     {formatDate(booking.bookedAt, {
                       day: 'numeric',
