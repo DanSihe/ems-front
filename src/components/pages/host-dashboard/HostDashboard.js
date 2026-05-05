@@ -197,7 +197,7 @@ const HostDashboard = () => {
         throw new Error(errorText || 'Unable to save event');
       }
 
-      messageApi.success(editingEvent ? 'Event updated' : 'Event created');
+      messageApi.success(editingEvent ? 'Event updated and sent for admin review' : 'Event created and sent for admin review');
       setEventModalOpen(false);
       eventForm.resetFields();
       fetchDashboard();
@@ -395,6 +395,16 @@ const HostDashboard = () => {
       render: (value) => (
         <Tag color={value === 'CANCELLED' ? 'red' : 'green'}>
           {value || 'ACTIVE'}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Approval',
+      dataIndex: 'approvalStatus',
+      key: 'approvalStatus',
+      render: (value) => (
+        <Tag color={value === 'APPROVED' ? 'green' : value === 'REJECTED' ? 'red' : 'gold'}>
+          {value || 'PENDING'}
         </Tag>
       ),
     },

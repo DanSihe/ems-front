@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Button,
@@ -15,10 +15,12 @@ import {
 } from 'antd';
 import {
   CalendarOutlined,
+  BellOutlined,
   EnvironmentOutlined,
   DeleteOutlined,
 } from '@ant-design/icons';
 import axios from 'axios';
+import { gsap } from 'gsap';
 import './myEvents.css';
 
 const { Title, Text } = Typography;
@@ -41,6 +43,7 @@ const formatDate = (value) =>
 
 const MyEvents = () => {
   const [messageApi, contextHolder] = message.useMessage();
+  const pageRef = useRef(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -80,6 +83,80 @@ const MyEvents = () => {
     loadBookings();
   }, [user?.id]);
 
+  useEffect(() => {
+    if (loading || !pageRef.current) {
+      return undefined;
+    }
+
+    const context = gsap.context(() => {
+      gsap.set(['.my-events-animate', '.my-booking-animate', '.booking-update-animate'], {
+        opacity: 0,
+        y: 24,
+      });
+
+      gsap.timeline({ defaults: { ease: 'power3.out' } })
+        .to('.my-events-animate', {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          stagger: 0.12,
+        })
+        .to('.my-booking-animate', {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.08,
+        }, '-=0.35')
+        .to('.booking-update-animate', {
+          opacity: 1,
+          y: 0,
+          duration: 0.45,
+          stagger: 0.06,
+        }, '-=0.35');
+    }, pageRef);
+
+    return () => context.revert();
+  }, [loading, bookings.length]);
+
+  useEffect(() => {
+    if (!bookings.length) {
+      return;
+    }
+
+    const cancellationUpdates = bookings.filter(
+      (booking) =>
+        booking.status === 'CANCELLED' &&
+        booking.refundStatus === 'PENDING' &&
+        booking.notificationMessage
+    );
+
+    if (!cancellationUpdates.length) {
+      return;
+    }
+
+    const seenNotifications = new Set(
+      JSON.parse(sessionStorage.getItem('seenBookingUpdates') || '[]')
+    );
+
+    const unseenUpdates = cancellationUpdates.filter(
+      (booking) => !seenNotifications.has(String(booking.id))
+    );
+
+    if (!unseenUpdates.length) {
+      return;
+    }
+
+    unseenUpdates.forEach((booking) => {
+      messageApi.info({
+        content: `${booking.event?.title || 'An event'} was cancelled. Please wait for your refund.`,
+        duration: 5,
+      });
+      seenNotifications.add(String(booking.id));
+    });
+
+    sessionStorage.setItem('seenBookingUpdates', JSON.stringify([...seenNotifications]));
+  }, [bookings, messageApi]);
+
   const fetchBookings = async () => {
     try {
       setLoading(true);
@@ -108,6 +185,13 @@ const MyEvents = () => {
     }
   };
 
+  const activeUpdates = bookings.filter(
+    (booking) =>
+      booking.status === 'CANCELLED' &&
+      booking.refundStatus === 'PENDING' &&
+      booking.notificationMessage
+  );
+
   if (!user?.id) {
     return (
       <div className="my-events-page">
@@ -125,15 +209,45 @@ const MyEvents = () => {
   }
 
   return (
-    <div className="my-events-page">
+    <div className="my-events-page" ref={pageRef}>
       {contextHolder}
       <div className="my-events-shell">
-        <div className="my-events-header">
+        <div className="my-events-header my-events-animate">
           <Title level={2}>My booked events</Title>
           <Text type="secondary">
             Manage your upcoming reservations and keep track of your confirmed tickets.
           </Text>
         </div>
+
+        <Card className="my-events-host-card my-events-animate">
+          <div className="my-events-host-card-copy">
+            <div>
+              <Title level={4}>Want to become a host?</Title>
+              <Text type="secondary">
+                Regular users can browse and book immediately. If you want to create and manage events, apply for a host account and the admin will review it.
+              </Text>
+            </div>
+            <Button type="primary" onClick={() => window.location.assign('/host-register')}>
+              Become a Host
+            </Button>
+          </div>
+        </Card>
+
+        {activeUpdates.length > 0 && (
+          <Card className="my-events-update-banner my-events-animate" bordered={false}>
+            <div className="my-events-update-banner-copy">
+              <div className="update-banner-icon">
+                <BellOutlined />
+              </div>
+              <div>
+                <Title level={5}>Booking updates available</Title>
+                <Text>
+                  {activeUpdates.length} cancelled event{activeUpdates.length > 1 ? 's have' : ' has'} refund processing in progress.
+                </Text>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {error && (
           <Alert
@@ -164,7 +278,7 @@ const MyEvents = () => {
             {bookings.map((booking) => (
               <Col xs={24} md={12} xl={8} key={booking.id}>
                 <Card
-                  className="my-booking-card"
+                  className="my-booking-card my-booking-animate"
                   cover={
                     <img
                       src={
@@ -207,10 +321,11 @@ const MyEvents = () => {
 
                     {booking.notificationMessage && (
                       <Alert
-                        type="info"
+                        type={booking.status === 'CANCELLED' ? 'warning' : 'info'}
                         showIcon
-                        message="Latest update"
+                        message={booking.status === 'CANCELLED' ? 'Event cancelled' : 'Latest update'}
                         description={booking.notificationMessage}
+                        className="booking-update-animate"
                       />
                     )}
 

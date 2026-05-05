@@ -19,6 +19,9 @@ import EventDetails from './components/pages/event-details/eventdetails';
 import MyEvents from './components/pages/my-events/MyEvents';
 import BookingConfirmation from './components/pages/booking-confirmation/BookingConfirmation';
 import HostDashboard from './components/pages/host-dashboard/HostDashboard';
+import AdminLogin from './components/pages/admin-login/AdminLogin';
+import AdminRegister from './components/pages/admin-register/AdminRegister';
+import AdminDashboard from './components/pages/admin-dashboard/AdminDashboard';
 import Footer from './components/footer/footer';
 const { Content } = Layout;
 
@@ -57,6 +60,9 @@ const App = () => {
             <Route path="/host-login" element={<HostLogin />} />
             <Route path="/host-register" element={<HostRegister />} />
             <Route path="host-update" element={<HostUpdateAccount />} />
+            <Route path={path.adminLoginPath} element={<AdminLogin />} />
+            <Route path={path.adminRegisterPath} element={<AdminRegister />} />
+            <Route path={path.adminDashboardPath} element={<AdminDashboard />} />
              <Route path="/event/:id" element={<EventDetails />} />
              <Route path="/my-events" element={<MyEvents />} />
              <Route path={path.bookingConfirmationPath} element={<BookingConfirmation />} />

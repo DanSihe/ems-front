@@ -28,8 +28,8 @@ const HostRegister = () => {
       });
 
       if (response.ok) {
-        message.success('🎉 Account created successfully! You can now login.');
-        setTimeout(() => navigate('/host-login'), 1200);
+        message.success('🎉 Host account created! Please wait for admin approval before login.');
+        setTimeout(() => navigate('/host-login'), 1600);
       } else {
         const errorData = await response.json();
         if (errorData.message?.includes('Email already in use')) {

@@ -70,6 +70,32 @@
   margin-bottom: 20px;
 }
 
+.mfa-alert-content p {
+  margin: 0 0 12px;
+}
+
+.demo-code-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(29, 78, 216, 0.08), rgba(14, 165, 233, 0.12));
+  border: 1px solid rgba(29, 78, 216, 0.16);
+}
+
+.demo-code-box span {
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.demo-code-box strong {
+  font-size: 1.15rem;
+  letter-spacing: 0.28em;
+  color: #0f172a;
+}
+
 .mfa-code-input input {
   text-align: center;
   letter-spacing: 0.35em;

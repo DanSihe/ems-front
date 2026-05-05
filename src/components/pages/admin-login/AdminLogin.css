@@ -1,0 +1,12 @@
+.admin-login-page .login-form {
+  max-width: 400px;
+}
+
+.admin-login-left {
+  background: linear-gradient(135deg, #102542 0%, #1d3557 55%, #497cf4 100%);
+}
+
+.admin-auth-link-row {
+  margin-top: 12px;
+  text-align: center;
+}

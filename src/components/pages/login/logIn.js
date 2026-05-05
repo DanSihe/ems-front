@@ -107,7 +107,17 @@ const Login = () => {
               type="info"
               showIcon
               message={challenge.message}
-              description={`Code expires at ${new Date(challenge.expiresAt).toLocaleTimeString()}.`}
+              description={
+                <div className="mfa-alert-content">
+                  <p>Code expires at {new Date(challenge.expiresAt).toLocaleTimeString()}.</p>
+                  {challenge.demoCode && (
+                    <div className="demo-code-box">
+                      <span>Use this code for verification</span>
+                      <strong>{challenge.demoCode}</strong>
+                    </div>
+                  )}
+                </div>
+              }
             />
           )}
 

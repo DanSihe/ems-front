@@ -15,18 +15,27 @@ const Header = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);  // client
   const [host, setHost] = useState(null);  // host
+  const [admin, setAdmin] = useState(null); // admin
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
     const storedHost = JSON.parse(localStorage.getItem('host'));
+    const storedAdmin = JSON.parse(localStorage.getItem('admin'));
+
+    if (storedAdmin) {
+      setAdmin(storedAdmin);
+    } else {
+      setAdmin(null);
+    }
     setUser(storedUser);
     setHost(storedHost);
 
     const syncUser = () => {
       setUser(JSON.parse(localStorage.getItem('user')));
       setHost(JSON.parse(localStorage.getItem('host')));
+      setAdmin(JSON.parse(localStorage.getItem('admin')));
     };
 
     window.addEventListener('storage', syncUser);
@@ -52,6 +61,10 @@ const Header = () => {
         localStorage.removeItem('loggedIn');
         setUser(null);
       }
+      if (admin) {
+        localStorage.removeItem('admin');
+        setAdmin(null);
+      }
       localStorage.removeItem('redirectAfterLogin');
       window.dispatchEvent(new Event('storage'));
       navigate('/');
@@ -59,12 +72,23 @@ const Header = () => {
       setIsModalVisible(true);
     } else if (key === 'manage') {
       navigate('/dashboard');
+    } else if (key === 'admin-dashboard') {
+      navigate('/admin-dashboard');
     }
   };
 
   const menu = (
     <Menu onClick={handleMenuClick}>
-      {host ? (
+      {admin ? (
+        <>
+          <Menu.Item key="admin-dashboard" icon={<CalendarOutlined />}>
+            Admin Dashboard
+          </Menu.Item>
+          <Menu.Item key="logout" icon={<LogoutOutlined />}>
+            Logout
+          </Menu.Item>
+        </>
+      ) : host ? (
         <>
           <Menu.Item key="manage" icon={<CalendarOutlined />}>
             Manage Events
@@ -98,6 +122,12 @@ const Header = () => {
     navigate('/login');
   };
 
+    const handleAdminLogin = () => {    
+    setIsModalVisible(false);
+    navigate('/admin-login');
+  };
+
+
   const handleHostLogin = () => {
     setIsModalVisible(false);
     navigate('/host-login');
@@ -110,6 +140,8 @@ const Header = () => {
 
   const greeting = host
     ? `Hi, ${host.firstName}! (Host)`
+    : admin
+    ? `Hi, ${admin.firstName}! (Admin)`
     : user
     ? `Hi, ${user.firstName}!`
     : null;
@@ -125,6 +157,9 @@ const Header = () => {
       )}
       {host && (
         <Link to="/dashboard" className="tab highlight-tab" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+      )}
+      {admin && (
+        <Link to="/admin-dashboard" className="tab highlight-tab" onClick={() => setMobileMenuOpen(false)}>Admin</Link>
       )}
     </>
   );
@@ -173,6 +208,12 @@ const Header = () => {
     
     <h3>Host</h3>
     <p>Create and manage your events with powerful tools.</p>
+  </div>
+
+  <div className="login-card" onClick={handleAdminLogin}>
+    
+    <h3>Admin</h3>
+    <p>Manage all aspects of the platform.</p>
   </div>
 </div>
       </Modal>
