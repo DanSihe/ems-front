@@ -5,6 +5,7 @@ import { EnvironmentOutlined, SearchOutlined, ThunderboltOutlined } from '@ant-d
 import { FcGoogle } from 'react-icons/fc';
 import { Rate } from 'antd';
 import { gsap } from 'gsap';
+import demoEvents from '../../../data/demoEvents';
 
 const SEARCH_HISTORY_KEY = 'ems_recent_searches';
 const VIEWED_CATEGORY_KEY = 'ems_viewed_event_categories';
@@ -71,11 +72,12 @@ export default function Presentation() {
         return response.json();
       })
       .then((data) => {
-        setEvents(data);
+        setEvents(Array.isArray(data) && data.length ? data : demoEvents);
         setLoading(false);
       })
-      .catch((err) => {
-        setError(err.message);
+      .catch(() => {
+        setEvents(demoEvents);
+        setError(null);
         setLoading(false);
       });
   }, [location.key, location.state?.refreshAt]);
@@ -257,7 +259,11 @@ export default function Presentation() {
       writeLocalArray(VIEWED_CATEGORY_KEY, nextCategories);
     }
 
-    navigate(`/event/${event.id}`);
+    navigate(`/event/${event.id}`, {
+      state: {
+        event,
+      },
+    });
   };
 
   if (loading) return <p>Loading events...</p>;

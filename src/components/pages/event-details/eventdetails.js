@@ -30,8 +30,9 @@ import {
   TagOutlined,
 } from '@ant-design/icons';
 import { FcGoogle } from 'react-icons/fc';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import mockCards from '../../../data/mockCards.json';
+import demoEvents from '../../../data/demoEvents';
 import './EventDetails.css';
 
 const { Title, Paragraph, Text } = Typography;
@@ -62,9 +63,17 @@ const averageRating = (items) => {
 
 const EventDetails = () => {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
-  const [event, setEvent] = useState(null);
+  const [event, setEvent] = useState(() => {
+    const routeEvent = location.state?.event;
+    if (routeEvent) {
+      return routeEvent;
+    }
+
+    return demoEvents.find((item) => String(item.id) === String(id)) || null;
+  });
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
@@ -96,20 +105,36 @@ const EventDetails = () => {
 
         const response = await fetch(`http://localhost:8080/api/events/${id}`);
         if (!response.ok) {
+          const fallbackEvent = location.state?.event
+            || demoEvents.find((item) => String(item.id) === String(id));
+
+          if (fallbackEvent) {
+            setEvent(fallbackEvent);
+            return;
+          }
+
           throw new Error('Event not found');
         }
 
         const data = await response.json();
         setEvent(data);
       } catch (fetchError) {
-        setError(fetchError.message || 'Unable to load event details');
+        const fallbackEvent = location.state?.event
+          || demoEvents.find((item) => String(item.id) === String(id));
+
+        if (fallbackEvent) {
+          setEvent(fallbackEvent);
+          setError('');
+        } else {
+          setError(fetchError.message || 'Unable to load event details');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchEvent();
-  }, [id]);
+  }, [id, location.state]);
 
   useEffect(() => {
     const fetchReviews = async () => {
