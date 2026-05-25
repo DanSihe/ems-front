@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import './Login.css';
 
 import logoImage from '../../../assets/logo.svg';
+import { getAuthErrorMessage } from '../../../utils/authMessages';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,10 +15,12 @@ const Login = () => {
   const [mfaLoading, setMfaLoading] = useState(false);
   const [challenge, setChallenge] = useState(null);
   const [email, setEmail] = useState('');
+  const [authError, setAuthError] = useState('');
 
   // Get redirect path if coming from an event
   const onFinish = async (values) => {
     setLoading(true);
+    setAuthError('');
     try {
       const response = await fetch('http://localhost:8080/api/login', {
         method: 'POST',
@@ -35,7 +38,9 @@ const Login = () => {
       setEmail(values.email);
       message.success(data.message || 'Verification code sent');
     } catch (error) {
-      message.error(error.message || 'Login failed');
+      const friendlyMessage = getAuthErrorMessage(error, 'client');
+      setAuthError(friendlyMessage);
+      message.error(friendlyMessage);
     } finally {
       setLoading(false);
     }
@@ -43,6 +48,7 @@ const Login = () => {
 
   const verifyMfa = async ({ code }) => {
     setMfaLoading(true);
+    setAuthError('');
     try {
       const response = await fetch('http://localhost:8080/api/login/verify-mfa', {
         method: 'POST',
@@ -72,7 +78,9 @@ const Login = () => {
         navigate('/', { replace: true });
       }
     } catch (error) {
-      message.error(error.message || 'Verification failed');
+      const friendlyMessage = getAuthErrorMessage(error, 'client');
+      setAuthError(friendlyMessage);
+      message.error(friendlyMessage);
     } finally {
       setMfaLoading(false);
     }
@@ -100,6 +108,15 @@ const Login = () => {
               ? `Enter the code sent to ${challenge.maskedEmail || email}.`
               : 'Sign in with your password, then confirm the one-time code.'}
           </p>
+
+          {authError && (
+            <Alert
+              className="auth-error-alert"
+              type="error"
+              showIcon
+              message={authError}
+            />
+          )}
 
           {challenge && (
             <Alert
@@ -169,6 +186,7 @@ const Login = () => {
                   onClick={() => {
                     setChallenge(null);
                     setEmail('');
+                    setAuthError('');
                   }}
                 >
                   Use a different email

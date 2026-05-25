@@ -2,13 +2,13 @@
 
 .login-wrapper {
   display: flex;
-  height: 100vh;
-  background-color: #f5f5f5;
+  min-height: calc(100vh - 150px);
+  background-color: #f6f8fb;
 }
 
 .login-left {
   flex: 1;
-  background: linear-gradient(135deg, #497cf4, #497cf4 50%, #1d3557);
+  background: linear-gradient(135deg, #102542 0%, #0f766e 100%);
   color: white;
   padding: 60px 40px;
   display: flex;
@@ -47,8 +47,9 @@
   max-width: 400px;
   background: white;
   padding: 40px 32px;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
 }
 
 .login-form h2 {
@@ -67,6 +68,10 @@
   margin-bottom: 18px;
 }
 
+.auth-error-alert {
+  margin-bottom: 18px;
+}
+
 .mfa-alert-content p {
   margin: 0 0 12px;
 }
@@ -77,7 +82,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: 8px;
   background: linear-gradient(135deg, rgba(29, 78, 216, 0.08), rgba(14, 165, 233, 0.12));
   border: 1px solid rgba(29, 78, 216, 0.16);
 }
@@ -102,7 +107,7 @@
 @media (max-width: 768px) {
   .login-wrapper {
     flex-direction: column;
-    min-height: 100vh;
+    min-height: calc(100vh - 140px);
   }
 
   .login-left,
@@ -116,5 +121,9 @@
 
   .login-right {
     padding: 24px 16px 40px;
+  }
+
+  .login-form {
+    padding: 30px 20px;
   }
 }

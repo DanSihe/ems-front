@@ -4,15 +4,18 @@ import { Alert, Form, Input, Button, message } from 'antd';
 import { useNavigate, Link } from 'react-router-dom';
 import './HostLogin.css';
 import logo from '../../../assets/logo.svg';
+import { getAuthErrorMessage } from '../../../utils/authMessages';
 
 const HostLogin = () => {
   const [loading, setLoading] = useState(false);
   const [mfaLoading, setMfaLoading] = useState(false);
   const [challenge, setChallenge] = useState(null);
+  const [authError, setAuthError] = useState('');
   const navigate = useNavigate();
 
   const onFinish = async ({ email, password }) => {
     setLoading(true);
+    setAuthError('');
     try {
       const response = await fetch('http://localhost:8080/api/hosts/login', {
         method: 'POST',
@@ -29,7 +32,9 @@ const HostLogin = () => {
       setChallenge(data);
       message.success(data.message || 'Verification code sent');
     } catch (error) {
-      message.error(`Login failed: ${error.message}`);
+      const friendlyMessage = getAuthErrorMessage(error, 'host');
+      setAuthError(friendlyMessage);
+      message.error(friendlyMessage);
     } finally {
       setLoading(false);
     }
@@ -37,6 +42,7 @@ const HostLogin = () => {
 
   const verifyMfa = async ({ code }) => {
     setMfaLoading(true);
+    setAuthError('');
     try {
       const response = await fetch('http://localhost:8080/api/hosts/login/verify-mfa', {
         method: 'POST',
@@ -58,7 +64,9 @@ const HostLogin = () => {
       window.dispatchEvent(new Event('storage'));
       navigate('/dashboard');
     } catch (error) {
-      message.error(`Verification failed: ${error.message}`);
+      const friendlyMessage = getAuthErrorMessage(error, 'host');
+      setAuthError(friendlyMessage);
+      message.error(friendlyMessage);
     } finally {
       setMfaLoading(false);
     }
@@ -85,6 +93,15 @@ const HostLogin = () => {
               ? `Enter the verification code sent to ${challenge.maskedEmail}.`
               : 'Use your password first, then confirm the one-time email code.'}
           </p>
+
+          {authError && (
+            <Alert
+              className="auth-error-alert"
+              type="error"
+              showIcon
+              message={authError}
+            />
+          )}
 
           {challenge && (
             <Alert
@@ -149,7 +166,10 @@ const HostLogin = () => {
                 <button
                   type="button"
                   className="login-link-button"
-                  onClick={() => setChallenge(null)}
+                  onClick={() => {
+                    setChallenge(null);
+                    setAuthError('');
+                  }}
                 >
                   Use a different host account
                 </button>

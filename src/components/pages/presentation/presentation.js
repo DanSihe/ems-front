@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './Presentation.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { EnvironmentOutlined, SearchOutlined, ThunderboltOutlined } from '@ant-design/icons';
@@ -9,6 +9,7 @@ import demoEvents from '../../../data/demoEvents';
 
 const SEARCH_HISTORY_KEY = 'ems_recent_searches';
 const VIEWED_CATEGORY_KEY = 'ems_viewed_event_categories';
+const EVENTS_PER_PAGE = 10;
 
 const averageRating = (items) => {
   if (!items.length) {
@@ -46,6 +47,24 @@ const writeLocalArray = (key, values) => {
   localStorage.setItem(key, JSON.stringify(values));
 };
 
+const getCurrentSearchProfile = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user?.id) {
+      return `user-${user.id}`;
+    }
+    if (user?.email) {
+      return `user-${user.email}`;
+    }
+  } catch (error) {
+    return 'guest';
+  }
+
+  return 'guest';
+};
+
+const scopedStorageKey = (baseKey) => `${baseKey}:${getCurrentSearchProfile()}`;
+
 export default function Presentation() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,11 +76,23 @@ export default function Presentation() {
   const [searchTerm, setSearchTerm] = useState('');
   const [recentSearches, setRecentSearches] = useState([]);
   const [viewedCategories, setViewedCategories] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const searchHistoryKey = useMemo(() => scopedStorageKey(SEARCH_HISTORY_KEY), []);
+  const viewedCategoryKey = useMemo(() => scopedStorageKey(VIEWED_CATEGORY_KEY), []);
+  const selectedCategory = useMemo(
+    () => new URLSearchParams(location.search).get('category') || '',
+    [location.search]
+  );
+  const normalizedSelectedCategory = normalize(selectedCategory);
 
   useEffect(() => {
-    setRecentSearches(readLocalArray(SEARCH_HISTORY_KEY));
-    setViewedCategories(readLocalArray(VIEWED_CATEGORY_KEY));
-  }, []);
+    setRecentSearches(readLocalArray(searchHistoryKey));
+    setViewedCategories(readLocalArray(viewedCategoryKey));
+  }, [searchHistoryKey, viewedCategoryKey]);
+
+  useEffect(() => {
+    setSearchTerm(selectedCategory);
+  }, [selectedCategory]);
 
   useEffect(() => {
     fetch('http://localhost:8080/api/events/all')
@@ -115,17 +146,25 @@ export default function Presentation() {
       }
 
       setRecentSearches(nextSearches);
-      writeLocalArray(SEARCH_HISTORY_KEY, nextSearches);
+      writeLocalArray(searchHistoryKey, nextSearches);
     }, 450);
 
     return () => window.clearTimeout(timeoutId);
-  }, [searchTerm, recentSearches]);
+  }, [searchTerm, recentSearches, searchHistoryKey]);
 
   const categorySuggestions = [...new Set(events.map((event) => event.category).filter(Boolean))].slice(0, 6);
   const publicAverage = averageRating(reviews);
   const normalizedSearch = normalize(searchTerm);
   const filteredEvents = events.filter((event) => {
+    if (normalizedSelectedCategory && normalize(event.category) !== normalizedSelectedCategory) {
+      return false;
+    }
+
     if (!normalizedSearch) {
+      return true;
+    }
+
+    if (normalizedSelectedCategory && normalizedSearch === normalizedSelectedCategory) {
       return true;
     }
 
@@ -139,8 +178,37 @@ export default function Presentation() {
 
     return searchableText.includes(normalizedSearch);
   });
+  const totalPages = Math.max(Math.ceil(filteredEvents.length / EVENTS_PER_PAGE), 1);
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const pageStart = (safeCurrentPage - 1) * EVENTS_PER_PAGE;
+  const paginatedEvents = filteredEvents.slice(pageStart, pageStart + EVENTS_PER_PAGE);
+  const firstVisibleEvent = filteredEvents.length ? pageStart + 1 : 0;
+  const lastVisibleEvent = Math.min(pageStart + EVENTS_PER_PAGE, filteredEvents.length);
+  const paginationPages = Array.from({ length: totalPages }, (_, index) => index + 1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [normalizedSearch, normalizedSelectedCategory]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const goToEventPage = (pageNumber) => {
+    const nextPage = Math.min(Math.max(pageNumber, 1), totalPages);
+    setCurrentPage(nextPage);
+    window.setTimeout(() => {
+      pageRef.current?.querySelector('.events-section')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 0);
+  };
 
   const recommendationSignals = [
+    normalizedSelectedCategory,
     ...recentSearches,
     ...viewedCategories,
     ...normalizedSearch.split(' ').filter(Boolean),
@@ -256,7 +324,7 @@ export default function Presentation() {
 
     if (normalizedCategory) {
       setViewedCategories(nextCategories);
-      writeLocalArray(VIEWED_CATEGORY_KEY, nextCategories);
+      writeLocalArray(viewedCategoryKey, nextCategories);
     }
 
     navigate(`/event/${event.id}`, {
@@ -292,7 +360,12 @@ export default function Presentation() {
                   <button
                     type="button"
                     className="search-clear"
-                    onClick={() => setSearchTerm('')}
+                    onClick={() => {
+                      setSearchTerm('');
+                      if (selectedCategory) {
+                        navigate('/');
+                      }
+                    }}
                   >
                     Clear
                   </button>
@@ -301,13 +374,25 @@ export default function Presentation() {
             </div>
 
             <div className="search-meta-row">
-              <span>{filteredEvents.length} event{filteredEvents.length === 1 ? '' : 's'} found</span>
+              <span>
+                {filteredEvents.length} event{filteredEvents.length === 1 ? '' : 's'} found
+                {selectedCategory ? ` in ${selectedCategory}` : ''}
+              </span>
               {recentSearches.length > 0 && (
-                <span>Built from your recent searches and viewed interests</span>
+                <span>Your private search history is visible only on this browser</span>
               )}
             </div>
 
             <div className="interest-chip-row">
+              {selectedCategory && (
+                <button
+                  type="button"
+                  className="interest-chip recent-chip"
+                  onClick={() => navigate('/')}
+                >
+                  All categories
+                </button>
+              )}
               {recentSearches.map((term) => (
                 <button
                   type="button"
@@ -315,15 +400,19 @@ export default function Presentation() {
                   className="interest-chip recent-chip"
                   onClick={() => setSearchTerm(term)}
                 >
-                  Recent: {term}
+                  Your search: {term}
                 </button>
               ))}
               {categorySuggestions.map((category) => (
                 <button
                   type="button"
                   key={category}
-                  className="interest-chip"
-                  onClick={() => setSearchTerm(category)}
+                  className={
+                    normalize(category) === normalizedSelectedCategory
+                      ? 'interest-chip active-interest-chip'
+                      : 'interest-chip'
+                  }
+                  onClick={() => navigate(`/?category=${encodeURIComponent(category)}`)}
                 >
                   {category}
                 </button>
@@ -339,12 +428,12 @@ export default function Presentation() {
             <span className="section-eyebrow">Picked for the customer</span>
             <h2>Recommended for you</h2>
             <p>
-              These suggestions adapt to what the customer searches for and the kinds of events they open most often.
+              Suggestions use your private searches and the events opened on this device.
             </p>
           </div>
           <div className="recommendation-badge">
             <ThunderboltOutlined />
-            <span>Smart demo recommendations</span>
+            <span>Private interests</span>
           </div>
         </div>
 
@@ -373,9 +462,17 @@ export default function Presentation() {
         <div className="section-heading">
           <div>
             <span className="section-eyebrow">Browse events</span>
-            <h2>{normalizedSearch ? `Search results for "${searchTerm}"` : 'Explore all upcoming events'}</h2>
+            <h2>
+              {selectedCategory
+                ? `${selectedCategory} events`
+                : normalizedSearch
+                ? `Search results for "${searchTerm}"`
+                : 'Explore all upcoming events'}
+            </h2>
             <p>
-              Customers can quickly narrow down events by type, location, or keywords with the live search above.
+              {selectedCategory
+                ? 'Browse this category or narrow it further by location, title, or keywords.'
+                : 'Browse approved upcoming events across music, business, education, and sports.'}
             </p>
           </div>
         </div>
@@ -386,23 +483,62 @@ export default function Presentation() {
             <p>Try another keyword like a category, suburb, artist, or event style.</p>
           </div>
         ) : (
-          <div className="event-grid">
-            {filteredEvents.map((event) => (
-              <div className="event-card results-animate" key={event.id}>
-                <img src={event.imageUrl} alt={event.title} loading="lazy" />
-                <div className="event-content">
-                  <span className="event-category-pill">{event.category || 'Featured'}</span>
-                  <h3>{event.title}</h3>
-                  <p className="date">{formatDate(event.date)}</p>
-                  <p className="event-location"><EnvironmentOutlined /> {event.location || 'Location to be announced'}</p>
-                  <p>{event.description}</p>
-                  <button onClick={() => openEvent(event)}>
-                    View Details
-                  </button>
+          <>
+            <div className="events-toolbar">
+              <span>
+                Showing {firstVisibleEvent}-{lastVisibleEvent} of {filteredEvents.length}
+              </span>
+              <span>{EVENTS_PER_PAGE} events per page</span>
+            </div>
+
+            <div className="event-grid">
+              {paginatedEvents.map((event) => (
+                <div className="event-card results-animate" key={event.id}>
+                  <img src={event.imageUrl} alt={event.title} loading="lazy" />
+                  <div className="event-content">
+                    <span className="event-category-pill">{event.category || 'Featured'}</span>
+                    <h3>{event.title}</h3>
+                    <p className="date">{formatDate(event.date)}</p>
+                    <p className="event-location"><EnvironmentOutlined /> {event.location || 'Location to be announced'}</p>
+                    <p>{event.description}</p>
+                    <button onClick={() => openEvent(event)}>
+                      View Details
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <nav className="event-pagination" aria-label="Event pagination">
+                <button
+                  type="button"
+                  onClick={() => goToEventPage(safeCurrentPage - 1)}
+                  disabled={safeCurrentPage === 1}
+                >
+                  Previous
+                </button>
+                {paginationPages.map((pageNumber) => (
+                  <button
+                    type="button"
+                    key={pageNumber}
+                    className={pageNumber === safeCurrentPage ? 'active-page' : ''}
+                    onClick={() => goToEventPage(pageNumber)}
+                    aria-current={pageNumber === safeCurrentPage ? 'page' : undefined}
+                  >
+                    {pageNumber}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => goToEventPage(safeCurrentPage + 1)}
+                  disabled={safeCurrentPage === totalPages}
+                >
+                  Next
+                </button>
+              </nav>
+            )}
+          </>
         )}
       </section>
 

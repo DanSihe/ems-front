@@ -5,15 +5,18 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../login/Login.css';
 import './AdminLogin.css';
 import logo from '../../../assets/logo.svg';
+import { getAuthErrorMessage } from '../../../utils/authMessages';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
   const [challenge, setChallenge] = useState(null);
   const [loading, setLoading] = useState(false);
   const [mfaLoading, setMfaLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   const startLogin = async (values) => {
     setLoading(true);
+    setAuthError('');
     try {
       const response = await fetch('http://localhost:8080/api/admin/login', {
         method: 'POST',
@@ -30,7 +33,9 @@ const AdminLogin = () => {
       setChallenge(payload);
       message.success(payload.message || 'Verification code sent');
     } catch (error) {
-      message.error(error.message || 'Admin login failed');
+      const friendlyMessage = getAuthErrorMessage(error, 'admin');
+      setAuthError(friendlyMessage);
+      message.error(friendlyMessage);
     } finally {
       setLoading(false);
     }
@@ -38,6 +43,7 @@ const AdminLogin = () => {
 
   const verifyMfa = async ({ code }) => {
     setMfaLoading(true);
+    setAuthError('');
     try {
       const response = await fetch('http://localhost:8080/api/admin/login/verify-mfa', {
         method: 'POST',
@@ -59,7 +65,9 @@ const AdminLogin = () => {
       message.success('Admin login successful');
       navigate('/admin-dashboard');
     } catch (error) {
-      message.error(error.message || 'Verification failed');
+      const friendlyMessage = getAuthErrorMessage(error, 'admin');
+      setAuthError(friendlyMessage);
+      message.error(friendlyMessage);
     } finally {
       setMfaLoading(false);
     }
@@ -85,6 +93,15 @@ const AdminLogin = () => {
               ? `Enter the verification code sent to ${challenge.maskedEmail}.`
               : 'Sign in with your admin account, then confirm the one-time verification code.'}
           </p>
+
+          {authError && (
+            <Alert
+              className="auth-error-alert"
+              type="error"
+              showIcon
+              message={authError}
+            />
+          )}
 
           {challenge && (
             <Alert
@@ -147,7 +164,14 @@ const AdminLogin = () => {
             </Button>
             <div className="admin-auth-link-row">
               {challenge ? (
-                <button type="button" className="login-link-button" onClick={() => setChallenge(null)}>
+                <button
+                  type="button"
+                  className="login-link-button"
+                  onClick={() => {
+                    setChallenge(null);
+                    setAuthError('');
+                  }}
+                >
                   Use a different admin account
                 </button>
               ) : (

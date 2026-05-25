@@ -8,11 +8,22 @@ import {
   CalendarOutlined,
   MenuOutlined,
 } from '@ant-design/icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.svg';
+
+const EVENT_CATEGORIES = ['Music', 'Business', 'Educational', 'Sports'];
+
+const readStoredUser = (key) => {
+  try {
+    return JSON.parse(localStorage.getItem(key));
+  } catch (error) {
+    return null;
+  }
+};
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(null);  // client
   const [host, setHost] = useState(null);  // host
   const [admin, setAdmin] = useState(null); // admin
@@ -20,9 +31,9 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    const storedHost = JSON.parse(localStorage.getItem('host'));
-    const storedAdmin = JSON.parse(localStorage.getItem('admin'));
+    const storedUser = readStoredUser('user');
+    const storedHost = readStoredUser('host');
+    const storedAdmin = readStoredUser('admin');
 
     if (storedAdmin) {
       setAdmin(storedAdmin);
@@ -33,9 +44,9 @@ const Header = () => {
     setHost(storedHost);
 
     const syncUser = () => {
-      setUser(JSON.parse(localStorage.getItem('user')));
-      setHost(JSON.parse(localStorage.getItem('host')));
-      setAdmin(JSON.parse(localStorage.getItem('admin')));
+      setUser(readStoredUser('user'));
+      setHost(readStoredUser('host'));
+      setAdmin(readStoredUser('admin'));
     };
 
     window.addEventListener('storage', syncUser);
@@ -44,13 +55,11 @@ const Header = () => {
 
   const handleMenuClick = ({ key }) => {
     if (key === 'update') {
-      if (key === 'update') {
-  if (host) {
-    navigate('/host-update');
-  } else {
-    navigate('/update-account');
-  }
-};
+      if (host) {
+        navigate('/host-update');
+      } else {
+        navigate('/update-account');
+      }
     } else if (key === 'logout') {
       if (host) {
         localStorage.removeItem('host');
@@ -138,6 +147,13 @@ const Header = () => {
     navigate('/', { state: { refreshAt: Date.now() } });
   };
 
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+  const currentCategory = new URLSearchParams(location.search).get('category') || '';
+  const isHome = location.pathname === '/';
+  const categoryPath = (category) => `/?category=${encodeURIComponent(category)}`;
+  const getTabClassName = (category) =>
+    currentCategory.toLowerCase() === category.toLowerCase() ? 'tab active-tab' : 'tab';
+
   const greeting = host
     ? `Hi, ${host.firstName}! (Host)`
     : admin
@@ -148,18 +164,31 @@ const Header = () => {
 
   const navLinks = (
     <>
-      <Link to="/" className="tab" onClick={() => setMobileMenuOpen(false)}>Featured Events</Link>
-      <Link to="/" className="tab" onClick={() => setMobileMenuOpen(false)}>Music</Link>
-      <Link to="/" className="tab" onClick={() => setMobileMenuOpen(false)}>Business</Link>
-      <Link to="/" className="tab" onClick={() => setMobileMenuOpen(false)}>Educational</Link>
+      <Link
+        to="/"
+        className={isHome && !currentCategory ? 'tab active-tab' : 'tab'}
+        onClick={closeMobileMenu}
+      >
+        Featured Events
+      </Link>
+      {EVENT_CATEGORIES.map((category) => (
+        <Link
+          key={category}
+          to={categoryPath(category)}
+          className={getTabClassName(category)}
+          onClick={closeMobileMenu}
+        >
+          {category}
+        </Link>
+      ))}
       {user && (
-        <Link to="/my-events" className="tab" onClick={() => setMobileMenuOpen(false)}>My Events</Link>
+        <Link to="/my-events" className="tab" onClick={closeMobileMenu}>My Events</Link>
       )}
       {host && (
-        <Link to="/dashboard" className="tab highlight-tab" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+        <Link to="/dashboard" className="tab highlight-tab" onClick={closeMobileMenu}>Dashboard</Link>
       )}
       {admin && (
-        <Link to="/admin-dashboard" className="tab highlight-tab" onClick={() => setMobileMenuOpen(false)}>Admin</Link>
+        <Link to="/admin-dashboard" className="tab highlight-tab" onClick={closeMobileMenu}>Admin</Link>
       )}
     </>
   );

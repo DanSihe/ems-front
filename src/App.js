@@ -48,7 +48,7 @@ const App = () => {
           style={{
             flex: 1,
             margin: 0,
-            padding: 12,
+            padding: 0,
             background: colorBgContainer,
           }}
         >

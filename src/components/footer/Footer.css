@@ -139,3 +139,40 @@
     padding: 18px 0 24px;
   }
 }
+
+.site_footer {
+  background:
+    linear-gradient(135deg, #05070d 0%, #0b1220 46%, #071711 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -24px 70px rgba(0, 0, 0, 0.42);
+}
+
+.footer_badge {
+  background: rgba(45, 212, 191, 0.12);
+  border-color: rgba(45, 212, 191, 0.28);
+  color: #5eead4;
+}
+
+.footer_intro p,
+.footer_social_block p,
+.footer_bottom_bar p {
+  color: rgba(226, 232, 240, 0.78);
+}
+
+.footer_link {
+  color: rgba(226, 232, 240, 0.86);
+}
+
+.footer_link:hover {
+  color: #f5b82e;
+}
+
+.footer_social_link {
+  border-color: rgba(148, 163, 184, 0.24);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.footer_social_link:hover {
+  background: #f5b82e;
+  color: #07111f;
+}
