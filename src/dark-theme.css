@@ -1,0 +1,229 @@
+body {
+  background: #05070d;
+}
+
+.ems-app-shell,
+.ant-layout,
+.ant-layout-content {
+  background: #05070d !important;
+  color: #e5edf7;
+}
+
+.header_logo,
+.login-logo,
+.register-logo,
+.update-image {
+  filter: brightness(0) invert(1) drop-shadow(0 12px 26px rgba(45, 212, 191, 0.28)) !important;
+}
+
+.header_logo_button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.login-container,
+.login-wrapper,
+.register-container,
+.update-account-container,
+.event-details-page,
+.booking-confirmation-page,
+.my-events-page,
+.host-dashboard-page,
+.admin-dashboard-page {
+  background:
+    linear-gradient(180deg, #05070d 0%, #07111f 48%, #060a12 100%) !important;
+  color: #e5edf7;
+}
+
+.login-left,
+.register-left,
+.update-account-left,
+.admin-login-left,
+.admin-register-left {
+  background:
+    linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(9, 45, 40, 0.88)) !important;
+  color: #f8fafc !important;
+}
+
+.login-right,
+.register-form-container,
+.update-account-right,
+.login-form,
+.event-details-shell,
+.event-hero-card,
+.event-stat-card,
+.booking-panel-card,
+.booking-summary-box,
+.seat-layout-card,
+.review-google-card,
+.review-form-card,
+.review-list-card,
+.single-review-card,
+.booking-confirmation-shell,
+.confirmation-main-card,
+.confirmation-side-card,
+.my-events-shell,
+.my-events-host-card,
+.my-events-update-banner,
+.my-booking-card,
+.my-events-empty,
+.admin-dashboard-shell,
+.admin-hero-card,
+.admin-stat-card,
+.admin-section-card,
+.metric-card,
+.dashboard-section-card {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(8, 13, 24, 0.96)) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  color: #e5edf7 !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34) !important;
+}
+
+.login-form,
+.register-form-container,
+.update-account-right {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.ant-typography,
+.ant-card,
+.ant-card-head-title,
+.ant-statistic-title,
+.ant-statistic-content,
+.ant-form-item-label > label,
+.ant-descriptions-title,
+.ant-descriptions-item-label,
+.ant-descriptions-item-content,
+.ant-result-title,
+.ant-result-subtitle,
+.login-form-title,
+.login-form-subtitle,
+.host-login-subtitle,
+.event-title,
+.booking-panel-title,
+.confirmation-title,
+.my-booking-title,
+.dashboard-welcome,
+.admin-eyebrow,
+.sider-brand .ant-typography {
+  color: #e5edf7 !important;
+}
+
+.ant-typography-secondary,
+.ant-form-item-extra,
+.ant-card-meta-description,
+.event-description-copy,
+.booking-trust-copy,
+.review-comment,
+.my-events-header p,
+.my-events-host-card-copy p,
+.footer_bottom_bar p {
+  color: rgba(203, 213, 225, 0.76) !important;
+}
+
+.ant-input,
+.ant-input-password,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-input-number-input,
+.ant-picker,
+.ant-select-selector,
+.ant-input-textarea,
+textarea.ant-input {
+  background: rgba(6, 10, 18, 0.86) !important;
+  border-color: rgba(148, 163, 184, 0.28) !important;
+  color: #f8fafc !important;
+}
+
+.ant-input::placeholder,
+.ant-input-number-input::placeholder,
+textarea.ant-input::placeholder {
+  color: rgba(148, 163, 184, 0.74) !important;
+}
+
+.ant-input-affix-wrapper .anticon,
+.ant-picker .anticon,
+.ant-select-arrow {
+  color: rgba(94, 234, 212, 0.82) !important;
+}
+
+.ant-table,
+.ant-table-container,
+.ant-table-content,
+.ant-table-thead > tr > th,
+.ant-table-tbody > tr > td {
+  background: #0b1220 !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
+  color: #e5edf7 !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: rgba(45, 212, 191, 0.08) !important;
+}
+
+.ant-modal-content,
+.ant-modal-header,
+.ant-drawer-content,
+.ant-drawer-header {
+  background: #0b1220 !important;
+  color: #e5edf7 !important;
+}
+
+.ant-modal-title,
+.ant-drawer-title,
+.ant-drawer-close {
+  color: #f8fafc !important;
+}
+
+.ant-btn-primary,
+.booking-action-button {
+  background: #2dd4bf !important;
+  border-color: #2dd4bf !important;
+  color: #04111f !important;
+  font-weight: 800;
+}
+
+.ant-btn-default {
+  background: rgba(15, 23, 42, 0.82) !important;
+  border-color: rgba(148, 163, 184, 0.28) !important;
+  color: #e5edf7 !important;
+}
+
+.ant-alert {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  color: #e5edf7 !important;
+}
+
+.host-dashboard-sider {
+  background: linear-gradient(180deg, #05070d 0%, #0b1220 100%) !important;
+}
+
+.host-dashboard-topbar,
+.host-dashboard-main,
+.host-dashboard-content,
+.host-dashboard-layout {
+  background: transparent !important;
+}
+
+.host-dashboard-menu .ant-menu-item {
+  color: #cbd5e1 !important;
+}
+
+.host-dashboard-menu .ant-menu-item-selected {
+  background: rgba(45, 212, 191, 0.16) !important;
+  color: #5eead4 !important;
+}
+
+.seat-map-shell,
+.stage-banner,
+.host-reply-box,
+.booking-summary-box,
+.confirmation-row,
+.queue-item {
+  border-color: rgba(148, 163, 184, 0.18) !important;
+}

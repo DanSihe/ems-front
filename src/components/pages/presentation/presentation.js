@@ -425,7 +425,7 @@ export default function Presentation() {
       <section className="recommendation-section">
         <div className="section-heading">
           <div>
-            <span className="section-eyebrow">Picked for the customer</span>
+            <span className="section-eyebrow">Personal picks</span>
             <h2>Recommended for you</h2>
             <p>
               Suggestions use your private searches and the events opened on this device.

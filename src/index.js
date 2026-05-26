@@ -1,7 +1,7 @@
 import 'antd/dist/reset.css'; // or 'antd/dist/antd.css' for older versions
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, theme } from 'antd';
 
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -11,7 +11,18 @@ root.render(
   <React.StrictMode>
     <ConfigProvider
       theme={{
-        // You can customize your theme here if needed
+        algorithm: theme.darkAlgorithm,
+        token: {
+          colorPrimary: '#2dd4bf',
+          colorInfo: '#38bdf8',
+          colorSuccess: '#34d399',
+          colorWarning: '#f5b82e',
+          colorError: '#fb7185',
+          borderRadius: 8,
+          colorBgBase: '#05070d',
+          colorTextBase: '#e5edf7',
+          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        },
       }}
     >
       <App />

@@ -23,6 +23,7 @@ import AdminLogin from './components/pages/admin-login/AdminLogin';
 import AdminRegister from './components/pages/admin-register/AdminRegister';
 import AdminDashboard from './components/pages/admin-dashboard/AdminDashboard';
 import Footer from './components/footer/footer';
+import './dark-theme.css';
 const { Content } = Layout;
 
 const App = () => {
@@ -36,7 +37,7 @@ const App = () => {
 
   return (
     <Router>
-      <Layout style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Layout className="ems-app-shell" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Header
           style={{
             padding: 0,

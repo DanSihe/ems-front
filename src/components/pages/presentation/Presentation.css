@@ -1368,3 +1368,58 @@
   background: rgba(45, 212, 191, 0.08);
   border-color: rgba(45, 212, 191, 0.16);
 }
+
+.hero {
+  min-height: 410px;
+  padding: 46px 24px 40px;
+}
+
+.hero h1 {
+  font-size: clamp(2.25rem, 4.4vw, 4rem);
+}
+
+.hero-search-panel {
+  margin-top: 22px;
+}
+
+.search-input-wrap {
+  min-height: 58px;
+  padding: 8px 14px 8px 18px;
+}
+
+.search-meta-row {
+  margin-top: 9px;
+  font-size: 0.88rem;
+}
+
+.interest-chip-row {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.interest-chip {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.recommendation-section {
+  padding-top: 34px;
+}
+
+.events-section {
+  padding-top: 34px;
+}
+
+@media (max-width: 760px) {
+  .hero {
+    padding: 42px 18px 34px;
+  }
+
+  .hero h1 {
+    font-size: 2.15rem;
+  }
+
+  .search-input-wrap {
+    min-height: 0;
+  }
+}
