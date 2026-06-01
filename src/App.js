@@ -1,7 +1,7 @@
 // src/App.js
 import React, { useEffect } from 'react';
-import { Layout, theme } from 'antd';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Layout, message, theme } from 'antd';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
@@ -24,7 +24,67 @@ import AdminRegister from './components/pages/admin-register/AdminRegister';
 import AdminDashboard from './components/pages/admin-dashboard/AdminDashboard';
 import Footer from './components/footer/footer';
 import './dark-theme.css';
+import {
+  AUTH_SESSION_DURATION_MS,
+  clearAuthSession,
+  getAuthSessionTimeRemaining,
+  hasActiveLogin,
+  startAuthSession,
+} from './utils/authSession';
 const { Content } = Layout;
+
+const AuthSessionGuard = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let timeoutId;
+
+    const expireSession = () => {
+      if (!hasActiveLogin()) {
+        return;
+      }
+
+      clearAuthSession();
+      window.dispatchEvent(new Event('storage'));
+      message.info('Your session expired after 1 hour. Please log in again.');
+      navigate('/', { replace: true });
+    };
+
+    const scheduleLogout = () => {
+      window.clearTimeout(timeoutId);
+
+      if (!hasActiveLogin()) {
+        return;
+      }
+
+      let remaining = getAuthSessionTimeRemaining();
+
+      if (remaining === null) {
+        startAuthSession();
+        remaining = AUTH_SESSION_DURATION_MS;
+      }
+
+      if (remaining <= 0) {
+        expireSession();
+        return;
+      }
+
+      timeoutId = window.setTimeout(expireSession, remaining);
+    };
+
+    scheduleLogout();
+    window.addEventListener('storage', scheduleLogout);
+    window.addEventListener('focus', scheduleLogout);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener('storage', scheduleLogout);
+      window.removeEventListener('focus', scheduleLogout);
+    };
+  }, [navigate]);
+
+  return null;
+};
 
 const App = () => {
   const {
@@ -37,6 +97,7 @@ const App = () => {
 
   return (
     <Router>
+      <AuthSessionGuard />
       <Layout className="ems-app-shell" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Header
           style={{

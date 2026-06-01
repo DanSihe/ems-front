@@ -6,6 +6,7 @@ import '../login/Login.css';
 import './AdminLogin.css';
 import logo from '../../../assets/logo.svg';
 import { getAuthErrorMessage } from '../../../utils/authMessages';
+import { startAuthSession } from '../../../utils/authSession';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -61,6 +62,7 @@ const AdminLogin = () => {
 
       const payload = await response.json();
       localStorage.setItem('admin', JSON.stringify(payload));
+      startAuthSession();
       window.dispatchEvent(new Event('storage'));
       message.success('Admin login successful');
       navigate('/admin-dashboard');

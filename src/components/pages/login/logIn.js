@@ -7,6 +7,7 @@ import './Login.css';
 
 import logoImage from '../../../assets/logo.svg';
 import { getAuthErrorMessage } from '../../../utils/authMessages';
+import { startAuthSession } from '../../../utils/authSession';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -67,6 +68,7 @@ const Login = () => {
       const data = await response.json();
       localStorage.setItem('user', JSON.stringify(data));
       localStorage.setItem('loggedIn', 'true');
+      startAuthSession();
       window.dispatchEvent(new Event('storage'));
       message.success('Login successful');
 

@@ -5,6 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import './HostLogin.css';
 import logo from '../../../assets/logo.svg';
 import { getAuthErrorMessage } from '../../../utils/authMessages';
+import { startAuthSession } from '../../../utils/authSession';
 
 const HostLogin = () => {
   const [loading, setLoading] = useState(false);
@@ -61,6 +62,7 @@ const HostLogin = () => {
       const data = await response.json();
       message.success('Login successful!');
       localStorage.setItem('host', JSON.stringify(data));
+      startAuthSession();
       window.dispatchEvent(new Event('storage'));
       navigate('/dashboard');
     } catch (error) {

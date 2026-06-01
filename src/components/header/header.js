@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.svg';
+import { clearAuthSession } from '../../utils/authSession';
 
 const EVENT_CATEGORIES = ['Music', 'Business', 'Educational', 'Sports'];
 
@@ -74,7 +75,7 @@ const Header = () => {
         localStorage.removeItem('admin');
         setAdmin(null);
       }
-      localStorage.removeItem('redirectAfterLogin');
+      clearAuthSession();
       window.dispatchEvent(new Event('storage'));
       navigate('/');
     } else if (key === 'login') {
