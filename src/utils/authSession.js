@@ -1,4 +1,4 @@
-export const AUTH_SESSION_DURATION_MS = 60 * 60 * 1000;
+export const AUTH_SESSION_DURATION_MS =60 * 60* 1000;
 const SESSION_EXPIRES_AT_KEY = 'authSessionExpiresAt';
 
 export const startAuthSession = () => {
